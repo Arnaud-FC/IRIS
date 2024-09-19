@@ -11,7 +11,6 @@ function App() {
 
   return (
     <>
-    <h2>Se connecter </h2>
       <form onSubmit={handleSubmit()}>
       <Box
       component="form"
