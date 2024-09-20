@@ -115,6 +115,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/me', name:'app_user_me', methods:['GET'])]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or (is_authenticated())'))]
     public function showMe(){
 
       $user = $this->getUser();
@@ -128,6 +129,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/me/delete', name:'app_delete_me', methods:['GET'])]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or (is_authenticated())'))]
     public function deleteMe(EntityManagerInterface $em){
 
       $user = $this->getUser();
@@ -143,6 +145,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/me/edit', name:'app_edit_me', methods:['PATCH'])]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or (is_authenticated())'))]
     public function updateMe(EntityManagerInterface $em, Request $request){
 
       $user = $this->getUser();
@@ -185,6 +188,7 @@ class UserController extends AbstractController
 
   
     #[Route('/all', name: 'app_user_show_all', methods: ['GET'])]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
     public function showAll(Request $request, UserRepository $userRepository): JsonResponse
     { 
 
@@ -249,6 +253,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
     public function show(User $user): Response
     {
       $userData = [
@@ -266,7 +271,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_user_edit', methods: ['PATCH'])]
-    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'))]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
     public function edit(Request $request, User $user, EntityManagerInterface $em): Response
     {
 
@@ -300,6 +305,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'app_user_delete', methods: ['DELETE'])]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager)
     {
       // $this->logger->notice("DELETING");
