@@ -1,0 +1,38 @@
+<?php
+/*
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\HttpFoundation\Response;
+
+class SecurityController extends AbstractController
+{
+    // private JWTTokenManagerInterface $jwtManager;
+
+    // public function __construct(JWTTokenManagerInterface $jwtManager)
+    // {
+    //     $this->jwtManager = $jwtManager;
+    // }
+
+    // #[Route('/api/login_check', name: 'api_login_check', methods: ['POST'])]
+    // public function login(/*Request $request)*/ //: JsonResponse
+    // {
+    //     // LexikJWT authenticator handles this
+    //     // Here we assume the token is being handled and just return a placeholder response
+    //     //return new JsonResponse(['message' => 'Login successful']);
+    // }
+/*   
+    #[Route('/test', name: 'api_test')]
+    public function apiTest(): Response
+    {
+        return new Response ('Vous etes connecté ');
+    }
+}
+*/

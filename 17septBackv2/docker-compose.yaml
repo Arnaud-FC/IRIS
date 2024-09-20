@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Service pour l'application PHP
+  # php:
+  #   image: php:8.1-fpm-alpine
+  #   container_name: php_app
+  #   volumes:
+  #     - ./app:/var/www/html
+  #   ports:
+  #     - "9000:9000"
+  #   networks:
+  #     - app-network
+  #   environment:
+  #     - PHP_MEMORY_LIMIT=512M
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  
+  # Service pour la base de données MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_DATABASE: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    # networks:
+    #   - app-network
+
+  # Service pour phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    # networks:
+    #   - app-network
+
+volumes:
+  db_data:
+
+# networks:
+#   app-network:
+#     driver: bridge
