@@ -7,6 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: VisiteRepository::class)]
 class Visite
@@ -17,12 +19,15 @@ class Visite
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['site:read'])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['site:read'])]
     private ?float $duration = null;
 
     #[ORM\Column]
+    #[Groups(['site:read'])]
     private ?int $price = null;
 
     #[ORM\Column(type: Types::TEXT)]
