@@ -64,7 +64,7 @@ class SiteController extends AbstractController
     }
 
     #[Route('/new', name: 'site_new')]
-    //#[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
+    // #[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
     public function register(Request $request, EntityManagerInterface $em, SiteRepository $siteRepository, SerializerInterface $serializer)
     {
      $data = json_decode($request->getContent(), true );

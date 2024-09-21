@@ -120,73 +120,101 @@ class VisiteController extends AbstractController
      return new JsonResponse(['message' => "visite créée"], JsonResponse::HTTP_CREATED);
     }
 
-    // #[Route('/{id}', name: 'app_site_show', methods: ['GET'])]
-    // public function show(Site $site): Response
-    // {
-    //   $siteData = [
-    //     'name' => $site->getName(),
-    //     'city' => $site->getCity()
-    //   ];
 
-    // // Retourner la réponse JSON
-    // return new JsonResponse($siteData);
-    // }
+    #[Route('/{id}/edit', name: 'app_visite_edit', methods: ['PATCH'])]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
+    public function edit(Request $request, Visite $visite, EntityManagerInterface $em, SiteRepository $siteRepository): Response
+    {
 
-    // #[Route('/{id}/edit', name: 'app_site_edit', methods: ['PATCH'])]
-    // #[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
-    // public function edit(Request $request, Site $site, EntityManagerInterface $em): Response
-    // {
+        $data = json_decode($request->getContent(), true);
 
-    //     $data = json_decode($request->getContent(), true);
+        foreach($data as $key => $value){
 
-    //     foreach($data as $key => $value){
-    //       if(property_exists($site, $key)){
-    //         $setter = 'set'. ucfirst($key);
-    //       }
-          
-    //       if(method_exists($site, $setter)){
-    //         $site->$setter($value);
-    //         // $this->logger->notice($value);
-    //       }
-    //     }
+            // IL FAIT CHIER AVEC LA PROPRIETE SITE IL FAUT LUI SETTER SI NECESSAIRE SANS TOUT CASSER 
+        //    if(property_exists($visite, $key) == 'site'){
 
-    //     $errors = $this->validator->validate($site);
+        //         $site = $siteRepository->find($data['site']);
+        //         if (!$site) {
+        //             return new JsonResponse(['message' => 'Site introuvable'], JsonResponse::HTTP_BAD_REQUEST);
+        //         }
+        //         $visite->setSite($site);
+        //    } 
+            if ($key === 'site') {
+                $site = $siteRepository->find($value);
+                if (!$site) {
+                    return new JsonResponse(['message' => 'Site introuvable'], JsonResponse::HTTP_BAD_REQUEST);
+                }
+                $visite->setSite($site);
+            } else {
 
-    //     if(count($errors) > 0 ){
-    //       return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
-    //     }
+                if(property_exists($visite, $key)){
+                    $setter = 'set'. ucfirst($key);
+                }
+                
+                if(method_exists($visite, $setter)){
+                    $visite->$setter($value);
+                    // $this->logger->notice($value);
+                }
+            }
+        }
 
-    //     $data = $this->serializer->serialize($site, 'json' , ['groups'=> 'site:read']);
+        $errors = $this->validator->validate($visite);
 
-    //     $data = json_decode($data);
+        if(count($errors) > 0 ){
+          return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
+        }
 
-    //     $em->flush();
+        $data = $this->serializer->serialize($visite, 'json' , ['groups'=> 'visite:read']);
 
-    //     return new JsonResponse(['site' => $data], JsonResponse::HTTP_OK);
-    // }
+        $data = json_decode($data);
 
-    // #[Route('/{id}/delete', name: 'app_site_delete', methods: ['DELETE'])]
-    // #[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
-    // public function delete(Request $request, site $site, EntityManagerInterface $entityManager)
-    // {
-    //   // $this->logger->notice("DELETING");
-    //   if (!$site) {
-    //     return new JsonResponse([
-    //         'error' => 'User not found'
-    //     ], Response::HTTP_NOT_FOUND); // 404
-    //   }
-    //     // if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+        $em->flush();
+
+        return new JsonResponse(['visite' => $data], JsonResponse::HTTP_OK);
+    }
+
+
+    #[Route('/{id}', name: 'app_visite_show', methods: ['GET'])]
+    public function show(Visite $visite): Response
+    {
+      $visiteData = [
+        'name' => $visite->getName(),
+        'city' => $visite->getDuration(),
+        'price' => $visite->getPrice(),
+        'description' => $visite->getDescription(),
+        'site' => $visite->getSite()
+      ];
+
+      $visiteData = $this->serializer->serialize($visite, 'json' , ['groups'=> 'visite:read']);
+
+      $visiteData = json_decode($visiteData);
+
+    // Retourner la réponse JSON
+    return new JsonResponse($visiteData);
+    }
+
+    #[Route('/{id}/delete', name: 'app_visite_delete', methods: ['DELETE'])]
+    //#[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
+    public function delete(Request $request, Visite $visite, EntityManagerInterface $entityManager)
+    {
+      // $this->logger->notice("DELETING");
+      if (!$visite) {
+        return new JsonResponse([
+            'error' => 'Visite not found'
+        ], Response::HTTP_NOT_FOUND); // 404
+      }
+        // if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
         
 
-    //         $entityManager->remove($site);
-    //         $entityManager->flush();
-    //     //}
+            $entityManager->remove($visite);
+            $entityManager->flush();
+        //}
 
-    //     //return new JsonResponse(['message' => 'user deleted'], JsonResponse::HTTP_ACCEPTED);
-    //     return new JsonResponse([
-    //       'message' => 'Site deleted successfully'
-    //   ], Response::HTTP_ACCEPTED);
-    // }
+        //return new JsonResponse(['message' => 'user deleted'], JsonResponse::HTTP_ACCEPTED);
+        return new JsonResponse([
+          'message' => 'visite deleted successfully'
+      ], Response::HTTP_ACCEPTED);
+    }
 
     
 

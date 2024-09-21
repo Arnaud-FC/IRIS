@@ -16,25 +16,28 @@ class Visite
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['visite:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['site:read'])]
+    #[Groups(['visite:read'])]
     private ?string $name = null;
 
     #[ORM\Column]
-    #[Groups(['site:read'])]
+    #[Groups(['visite:read'])]
     private ?float $duration = null;
 
     #[ORM\Column]
-    #[Groups(['site:read'])]
+    #[Groups(['visite:read'])]
     private ?int $price = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['visite:read'])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'visites')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['visite:read'])]
     private ?Site $site = null;
 
     /**

@@ -16,14 +16,15 @@ class Site
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['visite:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['site:read'])]
+    #[Groups(['visite:read', 'site:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['site:read'])]
+    #[Groups(['visite:read', 'site:read'])]
     private ?string $city = null;
 
     /**
