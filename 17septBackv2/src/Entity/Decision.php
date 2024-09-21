@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\DecisionRepository;
 use Doctrine\ORM\Mapping as ORM;
 Use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 
 #[ORM\Entity(repositoryClass: DecisionRepository::class)]
@@ -13,20 +15,22 @@ class Decision
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['decision:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: false)]
-    #[Assert\All([
-        new Assert\Choice(choices: ['accepted', 'waiting', 'denied'], message: 'statut non valide.')
-    ])]
+    #[Assert\Choice(choices: ['accepted', 'waiting', 'denied'], message: 'statut non valide.')]
+    #[Groups(['decision:read'])]
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'decisions')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['decision:read'])]
     private ?User $guide = null;
 
     #[ORM\ManyToOne(inversedBy: 'decisions')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['decision:read'])]
     private ?Reservation $reservation = null;
 
     public function getId(): ?int
@@ -34,12 +38,12 @@ class Decision
         return $this->id;
     }
 
-    public function isStatus(): ?bool
+    public function isStatus(): ?string
     {
         return $this->status;
     }
 
-    public function setStatus(bool $status): static
+    public function setStatus(string $status): static
     {
         $this->status = $status;
 

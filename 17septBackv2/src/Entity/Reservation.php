@@ -15,7 +15,7 @@ class Reservation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['visite:read'])]
+    #[Groups(['visite:read', 'decision:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
