@@ -21,14 +21,14 @@ class Message
     private ?string $message = null;
 
     #[ORM\ManyToOne(inversedBy: 'sender_messages')]
-    private ?user $sender = null;
+    private ?User $sender = null;
 
     #[ORM\ManyToOne]
-    private ?user $receiver = null;
+    private ?User $receiver = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?chat $chat = null;
+    private ?Chat $chat = null;
 
     public function getId(): ?int
     {
@@ -59,36 +59,36 @@ class Message
         return $this;
     }
 
-    public function getSender(): ?user
+    public function getSender(): ?User
     {
         return $this->sender;
     }
 
-    public function setSender(?user $sender): static
+    public function setSender(?User $sender): static
     {
         $this->sender = $sender;
 
         return $this;
     }
 
-    public function getReceiver(): ?user
+    public function getReceiver(): ?User
     {
         return $this->receiver;
     }
 
-    public function setReceiver(?user $receiver): static
+    public function setReceiver(?User $receiver): static
     {
         $this->receiver = $receiver;
 
         return $this;
     }
 
-    public function getChat(): ?chat
+    public function getChat(): ?Chat
     {
         return $this->chat;
     }
 
-    public function setChat(?chat $chat): static
+    public function setChat(?Chat $chat): static
     {
         $this->chat = $chat;
 

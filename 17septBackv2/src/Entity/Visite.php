@@ -16,11 +16,12 @@ class Visite
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['visite:read'])]
+    #[Groups(['visite:read', 'reservation:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['visite:read'])]
+    // ICI FAIRE GAFFE AUX GROUPES PEUT ETRE UNIQUEMENT ID NECESSAIRE ET PAS ICI
+    #[Groups(['visite:read', 'site:read', 'reservation:read'])]
     private ?string $name = null;
 
     #[ORM\Column]
@@ -47,9 +48,9 @@ class Visite
     private Collection $reservations;
 
     /**
-     * @var Collection<int, user>
+     * @var Collection<int, User>
      */
-    #[ORM\ManyToMany(targetEntity: user::class, inversedBy: 'visites')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'visites')]
     private Collection $guide;
 
     public function __construct()
@@ -111,12 +112,12 @@ class Visite
         return $this;
     }
 
-    public function getSite(): ?site
+    public function getSite(): ?Site
     {
         return $this->site;
     }
 
-    public function setSite(?site $site): static
+    public function setSite(?Site $site): static
     {
         $this->site = $site;
 
@@ -154,14 +155,14 @@ class Visite
     }
 
     /**
-     * @return Collection<int, user>
+     * @return Collection<int, User>
      */
     public function getGuide(): Collection
     {
         return $this->guide;
     }
 
-    public function addGuide(user $guide): static
+    public function addGuide(User $guide): static
     {
         if (!$this->guide->contains($guide)) {
             $this->guide->add($guide);
@@ -170,7 +171,7 @@ class Visite
         return $this;
     }
 
-    public function removeGuide(user $guide): static
+    public function removeGuide(User $guide): static
     {
         $this->guide->removeElement($guide);
 

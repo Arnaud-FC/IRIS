@@ -20,11 +20,11 @@ class Chat
 
     #[ORM\ManyToOne(inversedBy: 'chats')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?user $receiver = null;
+    private ?User $receiver = null;
 
     #[ORM\ManyToOne(inversedBy: 'senderChats')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?user $sender = null;
+    private ?User $sender = null;
 
     /**
      * @var Collection<int, Message>
@@ -54,24 +54,24 @@ class Chat
         return $this;
     }
 
-    public function getReceiver(): ?user
+    public function getReceiver(): ?User
     {
         return $this->receiver;
     }
 
-    public function setReceiver(?user $receiver): static
+    public function setReceiver(?User $receiver): static
     {
         $this->receiver = $receiver;
 
         return $this;
     }
 
-    public function getSender(): ?user
+    public function getSender(): ?User
     {
         return $this->sender;
     }
 
-    public function setSender(?user $sender): static
+    public function setSender(?User $sender): static
     {
         $this->sender = $sender;
 

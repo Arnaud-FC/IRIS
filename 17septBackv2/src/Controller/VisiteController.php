@@ -130,15 +130,6 @@ class VisiteController extends AbstractController
 
         foreach($data as $key => $value){
 
-            // IL FAIT CHIER AVEC LA PROPRIETE SITE IL FAUT LUI SETTER SI NECESSAIRE SANS TOUT CASSER 
-        //    if(property_exists($visite, $key) == 'site'){
-
-        //         $site = $siteRepository->find($data['site']);
-        //         if (!$site) {
-        //             return new JsonResponse(['message' => 'Site introuvable'], JsonResponse::HTTP_BAD_REQUEST);
-        //         }
-        //         $visite->setSite($site);
-        //    } 
             if ($key === 'site') {
                 $site = $siteRepository->find($value);
                 if (!$site) {
@@ -146,17 +137,17 @@ class VisiteController extends AbstractController
                 }
                 $visite->setSite($site);
             } else {
-
-                if(property_exists($visite, $key)){
-                    $setter = 'set'. ucfirst($key);
-                }
+              if(property_exists($visite, $key)){
+                $setter = 'set'. ucfirst($key);
+              }
                 
-                if(method_exists($visite, $setter)){
-                    $visite->$setter($value);
-                    // $this->logger->notice($value);
+              if(method_exists($visite, $setter)){
+                      $visite->$setter($value);
+                      // $this->logger->notice($value);
                 }
             }
-        }
+            }
+        
 
         $errors = $this->validator->validate($visite);
 
@@ -203,9 +194,6 @@ class VisiteController extends AbstractController
             'error' => 'Visite not found'
         ], Response::HTTP_NOT_FOUND); // 404
       }
-        // if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
-        
-
             $entityManager->remove($visite);
             $entityManager->flush();
         //}

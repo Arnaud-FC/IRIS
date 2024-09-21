@@ -20,7 +20,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'reservation:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
@@ -115,6 +115,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Decision::class, mappedBy: 'guide', orphanRemoval: true)]
     private Collection $decisions;
 
+    /**
+     * @var Collection<int, Reservation>
+     */
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'guide')]
+    private Collection $reservations_guide;
+
     public function __construct()
     {
         $this->notifications = new ArrayCollection();
@@ -126,6 +132,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->visites = new ArrayCollection();
         $this->reservations = new ArrayCollection();
         $this->decisions = new ArrayCollection();
+        $this->reservations_guide = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -509,6 +516,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($decision->getGuide() === $this) {
                 $decision->setGuide(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservationsGuide(): Collection
+    {
+        return $this->reservations_guide;
+    }
+
+    public function addReservationsGuide(Reservation $reservationsGuide): static
+    {
+        if (!$this->reservations_guide->contains($reservationsGuide)) {
+            $this->reservations_guide->add($reservationsGuide);
+            $reservationsGuide->setGuide($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservationsGuide(Reservation $reservationsGuide): static
+    {
+        if ($this->reservations_guide->removeElement($reservationsGuide)) {
+            // set the owning side to null (unless already changed)
+            if ($reservationsGuide->getGuide() === $this) {
+                $reservationsGuide->setGuide(null);
             }
         }
 

@@ -23,11 +23,11 @@ class Decision
 
     #[ORM\ManyToOne(inversedBy: 'decisions')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?user $guide = null;
+    private ?User $guide = null;
 
     #[ORM\ManyToOne(inversedBy: 'decisions')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?reservation $reservation = null;
+    private ?Reservation $reservation = null;
 
     public function getId(): ?int
     {
@@ -46,24 +46,24 @@ class Decision
         return $this;
     }
 
-    public function getGuide(): ?user
+    public function getGuide(): ?User
     {
         return $this->guide;
     }
 
-    public function setGuide(?user $guide): static
+    public function setGuide(?User $guide): static
     {
         $this->guide = $guide;
 
         return $this;
     }
 
-    public function getReservation(): ?reservation
+    public function getReservation(): ?Reservation
     {
         return $this->reservation;
     }
 
-    public function setReservation(?reservation $reservation): static
+    public function setReservation(?Reservation $reservation): static
     {
         $this->reservation = $reservation;
 

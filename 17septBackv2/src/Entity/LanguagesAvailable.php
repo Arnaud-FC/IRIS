@@ -19,9 +19,9 @@ class LanguagesAvailable
     private ?string $name = null;
 
     /**
-     * @var Collection<int, user>
+     * @var Collection<int, User>
      */
-    #[ORM\ManyToMany(targetEntity: user::class, inversedBy: 'languagesAvailables')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'languagesAvailables')]
     private Collection $user;
 
     public function __construct()
@@ -47,14 +47,14 @@ class LanguagesAvailable
     }
 
     /**
-     * @return Collection<int, user>
+     * @return Collection<int, User>
      */
     public function getUser(): Collection
     {
         return $this->user;
     }
 
-    public function addUser(user $user): static
+    public function addUser(User $user): static
     {
         if (!$this->user->contains($user)) {
             $this->user->add($user);
@@ -63,7 +63,7 @@ class LanguagesAvailable
         return $this;
     }
 
-    public function removeUser(user $user): static
+    public function removeUser(User $user): static
     {
         $this->user->removeElement($user);
 
