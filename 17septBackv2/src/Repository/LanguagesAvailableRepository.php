@@ -16,6 +16,15 @@ class LanguagesAvailableRepository extends ServiceEntityRepository
         parent::__construct($registry, LanguagesAvailable::class);
     }
 
+    public function findByNameLike(string $name)
+    {
+        return $this->createQueryBuilder('l')
+            ->where('LOWER(l.name) LIKE LOWER(:name)')
+            ->setParameter('name', '%' . $name . '%')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return LanguagesAvailable[] Returns an array of LanguagesAvailable objects
     //     */

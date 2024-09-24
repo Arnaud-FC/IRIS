@@ -125,113 +125,98 @@ class DecisionController extends AbstractController
     }
 
 
-    // #[Route('/{id}/edit', name: 'app_reservation_edit', methods: ['PATCH'])]
-    // //#[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
-    // public function edit(Request $request, VisiteRepository $visiteRepository, EntityManagerInterface $em, ReservationRepository $reservationRepository, Reservation $reservation, BillingRepository $billingRepository, UserRepository $userRepository): Response
-    // {
+    #[Route('/{id}/edit', name: 'app_decision_edit', methods: ['PATCH'])]
+    //#[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
+    public function edit(Request $request, EntityManagerInterface $em, ReservationRepository $reservationRepository, Reservation $reservation, UserRepository $userRepository, Decision $decision): Response
+    {
 
-    //     $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-    //     foreach($data as $key => $value){
+        foreach($data as $key => $value){
 
             
-    //         if ($key === 'visite') {
-    //             $visite = $visiteRepository->find((int) $value);
-    //             if (!$visite) {
-    //                 return new JsonResponse(['message' => 'Site introuvable'], JsonResponse::HTTP_BAD_REQUEST);
-    //             }
-    //             $reservation->setVisite($visite);
-    //         }
+            if ($key === 'reservation') {
+                $reservation = $reservationRepository->find((int) $value);
+                if (!$reservation) {
+                    return new JsonResponse(['message' => 'reservation introuvable'], JsonResponse::HTTP_BAD_REQUEST);
+                }
+                $decision->setReservation($reservation);
+            }
 
-    //         elseif ($key === 'billing') {
-    //             $billing = $billingRepository->find((int) $value);
-    //             if (!$billing) {
-    //                 return new JsonResponse(['message' => 'Facture introuvable'], JsonResponse::HTTP_BAD_REQUEST);
-    //             }
-    //             $reservation->setBilling($billing);
-    //         }
+            elseif ($key === 'guide') {
+                $guide = $userRepository->find((int) $value);
+                if (!$guide) {
+                    return new JsonResponse(['message' => 'Guide introuvable'], JsonResponse::HTTP_BAD_REQUEST);
+                }
+                $decision->setGuide($guide);
+            }
 
-    //         elseif ($key === 'custommer') {
-    //             $custommer = $userRepository->find((int) $value);
-    //             if (!$custommer) {
-    //                 return new JsonResponse(['message' => 'Client introuvable'], JsonResponse::HTTP_BAD_REQUEST);
-    //             }
-    //             $reservation->setCustommer($custommer);
-    //         }
-
-    //         elseif ($key === 'guide') {
-    //             $guide = $userRepository->find((int) $value);
-    //             if (!$guide) {
-    //                 return new JsonResponse(['message' => 'Guide introuvable'], JsonResponse::HTTP_BAD_REQUEST);
-    //             }
-    //             $reservation->setGuide($guide);
-    //         } else {
-    //             if(property_exists($reservation, $key)){
-    //                 $setter = 'set'. ucfirst($key);
-    //             }
+            else {
+                if(property_exists($decision, $key)){
+                    $setter = 'set'. ucfirst($key);
+                }
                     
-    //             if(method_exists($reservation, $setter)){
-    //                 $reservation->$setter($value);
-    //                     // $this->logger->notice($value);
-    //             }
-    //         }
-    //     }
+                if(method_exists($decision, $setter)){
+                    $decision->$setter($value);
+                        // $this->logger->notice($value);
+                }
+            }
+        }
         
 
-    //     $errors = $this->validator->validate($reservation);
+        $errors = $this->validator->validate($decision);
 
-    //     if(count($errors) > 0 ){
-    //       return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
-    //     }
+        if(count($errors) > 0 ){
+          return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
+        }
 
-    //     $data = $this->serializer->serialize($reservation, 'json' , ['groups'=> 'reservation:read']);
+        $data = $this->serializer->serialize($decision, 'json' , ['groups'=> 'decision:read']);
 
-    //     $data = json_decode($data);
+        $data = json_decode($data);
 
-    //     $em->flush();
+        $em->flush();
 
-    //     return new JsonResponse(['visite' => $data], JsonResponse::HTTP_OK);
-    // }
+        return new JsonResponse(['decision' => $data], JsonResponse::HTTP_OK);
+    }
 
 
-    // #[Route('/{id}', name: 'reservation_show', methods: ['GET'])]
-    // public function show(reservation $reservation): Response
-    // {
-    //   $reservationData = [
-    //     'status' => $reservation->getStatus(),
-    //     'billing' => $reservation->getBilling(),
-    //     'custommer' => $reservation->getCustommer(),
-    //     'guide' => $reservation->getGuide()
-    //   ];
+    #[Route('/{id}', name: 'decision_show', methods: ['GET'])]
+    public function show(Decision $decision): Response
+    {
+      $decisionData = [
+        'guide' => $decision->getGuide(),
+        'reservation' => $decision->getReservation(),
+        'status' => $decision->getStatus()
+      ];
 
-    //   $reservationData = $this->serializer->serialize($reservation, 'json' , ['groups'=> 'reservation:read']);
+      $decisionData = $this->serializer->serialize($decision, 'json' , ['groups'=> 'decision:read']);
 
-    //   $reservationData = json_decode($reservationData);
+      $decisionData = json_decode($decisionData);
 
-    // // Retourner la réponse JSON
-    // return new JsonResponse($reservationData);
-    // }
+    // Retourner la réponse JSON
+    return new JsonResponse($decisionData);
+    }
 
-    // #[Route('/{id}/delete', name: 'app_reservation_delete', methods: ['DELETE'])]
-    // //#[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
-    // public function delete(Request $request, Reservation $reservation, EntityManagerInterface $entityManager)
-    // {
-    //   // $this->logger->notice("DELETING");
-    //   if (!$reservation) {
-    //     return new JsonResponse([
-    //         'error' => 'reservation not found'
-    //     ], Response::HTTP_NOT_FOUND); // 404
-    //   }
+    #[Route('/{id}/delete', name: 'app_decision_delete', methods: ['DELETE'])]
+    //#[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
+    public function delete(Request $request, decision $decision, EntityManagerInterface $entityManager)
+    {
+      // $this->logger->notice("DELETING");
+      if (!$decision) {
+        return new JsonResponse([
+            'error' => 'decision not found'
+        ], Response::HTTP_NOT_FOUND); // 404
+      }
 
-    //         $entityManager->remove($reservation);
-    //         $entityManager->flush();
-    //     //}
+            $entityManager->remove($decision);
+            $entityManager->flush();
+        //}
 
-    //     //return new JsonResponse(['message' => 'user deleted'], JsonResponse::HTTP_ACCEPTED);
-    //     return new JsonResponse([
-    //       'message' => 'reservation deleted successfully'
-    //   ], Response::HTTP_ACCEPTED);
-    // }
+        //return new JsonResponse(['message' => 'user deleted'], JsonResponse::HTTP_ACCEPTED);
+        return new JsonResponse([
+          'message' => 'decision deleted successfully'
+      ], Response::HTTP_ACCEPTED);
+    }
 
 
 }

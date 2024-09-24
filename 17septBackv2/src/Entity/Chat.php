@@ -6,6 +6,8 @@ use App\Repository\ChatRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: ChatRepository::class)]
 class Chat
@@ -13,17 +15,21 @@ class Chat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['chat:read', 'message:read'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['chat:read'])]
     private ?bool $open = null;
 
     #[ORM\ManyToOne(inversedBy: 'chats')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['chat:read'])]
     private ?User $receiver = null;
 
     #[ORM\ManyToOne(inversedBy: 'senderChats')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['chat:read'])]
     private ?User $sender = null;
 
     /**

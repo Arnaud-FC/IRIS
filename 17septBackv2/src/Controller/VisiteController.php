@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Visite;
+use App\Entity\User;
 use App\Entity\Site;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -202,6 +203,44 @@ class VisiteController extends AbstractController
         return new JsonResponse([
           'message' => 'visite deleted successfully'
       ], Response::HTTP_ACCEPTED);
+    }
+
+    #[Route('/{id}/guide', name: 'visite_add_guide', methods: ['POST'])]
+    public function addGuide(Visite $visite, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer l'ID du guide à ajouter depuis la requête
+        $data = json_decode($request->getContent(), true);
+        $guideId = $data['guide'] ?? null;
+
+        // Récupérer le guide à ajouter
+        $guide = $em->getRepository(User::class)->find($guideId);
+
+        if (!$guide) {
+            return new JsonResponse(['error' => 'Guide not found'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Ajouter le guide à la visite
+        $visite->addGuide($guide);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Guide added to visit'], JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/{id}/guide/{guideId}', name: 'visite_remove_guide', methods: ['DELETE'])]
+    public function removeGuide(Visite $visite, int $guideId, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer le guide à retirer
+        $guide = $em->getRepository(User::class)->find($guideId);
+
+        if (!$guide) {
+            return new JsonResponse(['error' => 'Guide not found'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Retirer le guide de la visite
+        $visite->removeGuide($guide);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Guide removed from visit'], JsonResponse::HTTP_OK);
     }
 
     

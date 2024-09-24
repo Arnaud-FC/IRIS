@@ -20,7 +20,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'reservation:read', 'decision:read'])]
+    #[Groups(['user:read', 'reservation:read', 'decision:read', 'notification:read', 'chat:read', 'message:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
@@ -50,11 +50,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['decision:read'])]
+    #[Groups(['decision:read', 'notification:read', 'chat:read', 'message:read'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['decision:read'])]
+    #[Groups(['decision:read', 'notification:read', 'chat:read', 'message:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 1000, nullable: true)]
@@ -436,6 +436,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+
 
     /**
      * @return Collection<int, Visite>

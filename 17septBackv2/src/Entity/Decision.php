@@ -38,7 +38,7 @@ class Decision
         return $this->id;
     }
 
-    public function isStatus(): ?string
+    public function getStatus(): ?string
     {
         return $this->status;
     }

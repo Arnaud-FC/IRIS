@@ -14,6 +14,7 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Psr\Log\LoggerInterface;
+use App\Entity\LanguagesAvailable;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Form\UserType;
 use Doctrine\ORM\EntityManager;
@@ -325,6 +326,56 @@ class UserController extends AbstractController
         return new JsonResponse([
           'status' => 'User deleted successfully'
       ], Response::HTTP_NO_CONTENT);
+    }
+
+     /**
+     * Ajoute une langue à un utilisateur.
+     */ 
+    #[Route('/{id}/language', name: 'user_add_language', methods: ['POST'])]
+     
+    public function addLanguage(User $user, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer le contenu de la requête JSON
+        $data = json_decode($request->getContent(), true);
+        $languageId = $data['language'] ?? null;
+
+        // Récupérer la langue à ajouter
+        $language = $em->getRepository(LanguagesAvailable::class)->find($languageId);
+
+        if (!$language) {
+            // Retourner une erreur si la langue n'est pas trouvée
+            return new JsonResponse(['error' => 'Language not found'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Ajouter la langue à l'utilisateur
+        $user->addLanguagesAvailable($language); // Méthode ajoutée dans l'entité User
+        $em->flush();
+
+        // Retourner une réponse de succès
+        return new JsonResponse(['message' => 'Language added to user'], JsonResponse::HTTP_OK);
+    }
+
+    /**
+     * Retire une langue d'un utilisateur.
+     */ 
+    #[Route('/{id}/language/{languageId}', name: 'user_remove_language', methods: ['DELETE'])]
+     
+    public function removeLanguage(User $user, int $languageId, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer la langue à supprimer
+        $language = $em->getRepository(LanguagesAvailable::class)->find($languageId);
+
+        if (!$language) {
+            // Retourner une erreur si la langue n'est pas trouvée
+            return new JsonResponse(['error' => 'Language not found'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Retirer la langue de l'utilisateur
+        $user->removeLanguagesAvailable($language); // Méthode ajoutée dans l'entité User
+        $em->flush();
+
+        // Retourner une réponse de succès
+        return new JsonResponse(['message' => 'Language removed from user'], JsonResponse::HTTP_OK);
     }
 
 }

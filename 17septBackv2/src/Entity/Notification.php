@@ -14,18 +14,21 @@ class Notification
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['notification:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'notification:read'])]
     private ?string $status = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'notification:read'])]
     private ?string $message = null;
 
-    #[ORM\ManyToOne(inversedBy: 'notifications')]
+    #[ORM\ManyToOne(inversedBy: 'notifications')] 
+    // #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'notifications', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['notification:read'])]
     private ?User $user = null;
 
     public function getId(): ?int
