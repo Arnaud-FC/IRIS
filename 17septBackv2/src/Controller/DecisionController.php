@@ -19,8 +19,10 @@ use Symfony\Component\ExpressionLanguage\Expression;
 use App\Entity\Reservation;
 use App\Repository\ReservationRepository;
 use App\Entity\Decision;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use App\Repository\DecisionRepository;
 use App\Entity\User;
+use App\Entity\Notification;
 use App\Repository\UserRepository;
 
 
@@ -199,7 +201,7 @@ class DecisionController extends AbstractController
 
     #[Route('/{id}/delete', name: 'app_decision_delete', methods: ['DELETE'])]
     //#[IsGranted(new Expression('is_granted("ROLE_ADMIN")'))]
-    public function delete(Request $request, decision $decision, EntityManagerInterface $entityManager)
+    public function delete(Request $request, Decision $decision, EntityManagerInterface $entityManager)
     {
       // $this->logger->notice("DELETING");
       if (!$decision) {
@@ -216,6 +218,82 @@ class DecisionController extends AbstractController
         return new JsonResponse([
           'message' => 'decision deleted successfully'
       ], Response::HTTP_ACCEPTED);
+    }
+
+    // #[Route('/{id}/response', name: 'app_decision_response', methods:['POST'])]
+    // public function guideDecision(Request $request, Decision $decision, User $user){
+
+    //     $user = $this->getUser(); 
+
+    //     $decision->setStatus($request['status']);
+
+        
+    // }
+
+    #[Route('/{id}/response', name: 'decision_response', methods: ['POST'])]
+    #[IsGranted(new Expression('is_granted("ROLE_GUIDE") or is_granted("ROLE_ADMIN")'))]
+    public function respondToDecision(int $id, Request $request, DecisionRepository $decisionRepository, Decision $decision): JsonResponse
+    {
+        // Récupérer l'utilisateur connecté via JWT
+        $user = $this->getUser(); // Ceci fonctionne avec JWT
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not authenticated'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        // Récupérer la décision à partir de l'ID
+        // $decision = $decisionRepository->find($id);
+        // if (!$decision) {
+        //     return new JsonResponse(['error' => 'Decision not found'], JsonResponse::HTTP_NOT_FOUND);
+        // }
+
+
+        // Vérifier que l'utilisateur connecté est bien le guide lié à la décision
+        if ($decision->getGuide()->getId() !== $user->getId()) {
+            throw new AccessDeniedException('You are not authorized to respond to this decision.');
+        }
+
+        // Récupérer le statut de la décision à partir de la requête (accepté ou refusé)
+        $data = json_decode($request->getContent(), true);
+        $status = $data['status'] ?? null;
+
+        // Valider le statut
+        if (!in_array($status, ['accepted', 'denied'])) {
+            return new JsonResponse(['error' => 'Invalid status'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Mettre à jour le statut de la décision
+        $decision->setStatus($status);
+
+
+        $this->entityManager->persist($decision);
+        $this->entityManager->flush();
+
+        // je dois recuperer le custommer et la decision
+        // //creer une notif
+        // createNotification($custommer, $decision, $reservation);
+        // Notifier le client si la décision est acceptée
+        if ($status === 'accepted') {
+            $this->createCustommerNotification($decision->getReservation()->getCustommer(), $decision->getReservation());
+            // Vous pouvez aussi envoyer un email ici
+            // $this->sendNotificationEmail($decision->getReservation()->getCustomer(), $mailer);
+        }
+
+        // Retourner la réponse avec les données de la décision mise à jour
+        $responseData = $this->serializer->serialize($decision, 'json', ['groups' => 'decision:read']);
+        return new JsonResponse(json_decode($responseData), JsonResponse::HTTP_OK);
+    }
+
+    private function createCustommerNotification(User $custommer, Reservation $reservation)
+    {
+
+        $notification = new Notification();
+        $notification->setUser($custommer);
+        $notification->setMessage(sprintf(" One guide accept your reservation '%s'.", $reservation->getVisite()->getName()));
+        $notification->setStatus('waiting'); // Par exemple, statut 'unread'
+
+        $this->entityManager->persist($notification);
+        $this->entityManager->flush();
     }
 
 

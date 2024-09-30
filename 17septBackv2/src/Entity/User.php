@@ -137,6 +137,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->reservations_guide = new ArrayCollection();
     }
 
+
     public function getId(): ?int
     {
         return $this->id;
@@ -186,6 +187,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = [$roles];
 
         return $this;
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this->getRoles());
     }
 
     /**

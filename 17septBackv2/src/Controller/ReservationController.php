@@ -4,6 +4,7 @@ namespace App\Controller;
 
 // use App\DTO\UserDTO;
 
+use App\Entity\Notification;
 use App\Repository\BillingRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,11 +16,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\ExpressionLanguage\Expression;
+use App\Entity\User;
 use App\Entity\Reservation;
 use App\Repository\ReservationRepository;
+use App\Repository\ChatRepository;
 use App\Repository\UserRepository;
 use App\Repository\VisiteRepository;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 
 #[Route('/api/reservation')]
@@ -248,6 +251,7 @@ class ReservationController extends AbstractController
           'message' => 'reservation deleted successfully'
       ], Response::HTTP_ACCEPTED);
     }
+
 
 
 }

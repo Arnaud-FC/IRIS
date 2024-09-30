@@ -10,7 +10,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Visite;
 use App\Entity\User;
-use App\Entity\Site;
+use App\Entity\Decision;
+use App\Entity\Reservation;
+use App\Entity\Notification;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Psr\Log\LoggerInterface;
@@ -241,6 +243,71 @@ class VisiteController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['message' => 'Guide removed from visit'], JsonResponse::HTTP_OK);
+    }
+
+
+    #[Route('/{visiteId}/reservation', name: 'create_reservation', methods: ['POST'])]
+    public function createReservation(int $visiteId, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer les données de la requête
+        $data = json_decode($request->getContent(), true);
+        $userId = $data['user'] ?? null;
+
+        // Vérifier que l'utilisateur existe
+        $user = $em->getRepository(User::class)->find($userId);
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Vérifier que la visite existe
+        $visite = $em->getRepository(Visite::class)->find($visiteId);
+        if (!$visite) {
+            return new JsonResponse(['error' => 'Visit not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Créer la réservation
+        $reservation = new Reservation();
+        $reservation->setVisite($visite);
+        $reservation->setCustommer($user); // Associer l'utilisateur à la réservation
+        $reservation->setStatus('waiting'); // Statut initial
+        $em->persist($reservation);
+        $em->flush();
+
+        // Lire les guides disponibles pour la visite
+        $guides = $visite->getGuide();
+
+
+        // Pour chaque guide, créer une notification
+        foreach ($guides as $guide) {
+            $this->createDecision($guide, $reservation);
+            $this->createNotification($guide, $reservation);
+            $this->logger->notice('+1 notif pour 1 guide');
+
+        }
+
+        return new JsonResponse(['message' => 'Reservation created successfully'], JsonResponse::HTTP_CREATED);
+    }
+
+    private function createNotification(User $guide, Reservation $reservation)
+    {
+
+        $notification = new Notification();
+        $notification->setUser($guide);
+        $notification->setMessage(sprintf(" OHOHOHOH You have a new reservation request for visit '%s'.", $reservation->getVisite()->getName()));
+        $notification->setStatus('waiting'); // Par exemple, statut 'unread'
+
+        $this->entityManager->persist($notification);
+        $this->entityManager->flush();
+    }
+
+    private function createDecision(User $guide, Reservation $reservation){
+      $decision = new Decision();
+      $decision->setReservation($reservation);
+      $decision->setGuide($guide);
+      $decision->setStatus('waiting');
+
+      $this->entityManager->persist($decision);
+      $this->entityManager->flush();
     }
 
     
