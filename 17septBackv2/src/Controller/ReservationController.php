@@ -51,6 +51,8 @@ class ReservationController extends AbstractController
         $custommer = $request->query->get('custommer');
         $visite = $request->query->get('visite');
         $billing = $request->query->get('billing');
+        $language = $request->query->get('language');
+        
 
     
         $queryBuilder = $reservationRepository->createQueryBuilder('reservation');
@@ -74,6 +76,11 @@ class ReservationController extends AbstractController
             $queryBuilder->andWhere('reservation.billing LIKE :billing')
                         ->setParameter('billing', '%' . $billing . '%');
         }
+        
+        if ($language) {
+            $queryBuilder->andWhere('reservation.billing LIKE :language')
+                        ->setParameter('language', '%' . $language . '%');
+        }
     
         $reservation = $queryBuilder->getQuery()->getResult();
     
@@ -92,6 +99,7 @@ class ReservationController extends AbstractController
 
      $reservation = new Reservation;
      $reservation->setStatus($data['status']);
+     $reservation->setLanguage($data['language']);
 
      $visite = $visiteRepository->find($data['visite']);
      if (!$visite) {
@@ -120,6 +128,7 @@ class ReservationController extends AbstractController
         }
         $reservation->setCustommer($custommer);
         $errors = $this->validator->validate($custommer);
+
 
      if (count($errors) > 0) {
         $errorMessages = [];
@@ -220,7 +229,8 @@ class ReservationController extends AbstractController
         'status' => $reservation->getStatus(),
         'billing' => $reservation->getBilling(),
         'custommer' => $reservation->getCustommer(),
-        'guide' => $reservation->getGuide()
+        'guide' => $reservation->getGuide(),
+        'language' => $reservation->getLanguage()
       ];
 
       $reservationData = $this->serializer->serialize($reservation, 'json' , ['groups'=> 'reservation:read']);

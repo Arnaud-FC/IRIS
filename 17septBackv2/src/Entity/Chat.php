@@ -38,6 +38,9 @@ class Chat
     #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'chat', orphanRemoval: true)]
     private Collection $messages;
 
+    #[ORM\ManyToOne(inversedBy: 'chats')]
+    private ?reservation $reservation = null;
+
     public function __construct()
     {
         $this->messages = new ArrayCollection();
@@ -110,6 +113,18 @@ class Chat
                 $message->setChat(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getReservation(): ?reservation
+    {
+        return $this->reservation;
+    }
+
+    public function setReservation(?reservation $reservation): static
+    {
+        $this->reservation = $reservation;
 
         return $this;
     }

@@ -46,9 +46,20 @@ class Reservation
     #[ORM\ManyToOne(inversedBy: 'reservations_guide')]
     private ?User $guide = null;
 
+    /**
+     * @var Collection<int, Chat>
+     */
+    #[ORM\OneToMany(targetEntity: Chat::class, mappedBy: 'reservation')]
+    private Collection $chats;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['reservation:read'])]
+    private ?int $language = null;
+
     public function __construct()
     {
         $this->decisions = new ArrayCollection();
+        $this->chats = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -142,6 +153,48 @@ class Reservation
     public function setGuide(?User $guide): static
     {
         $this->guide = $guide;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Chat>
+     */
+    public function getChats(): Collection
+    {
+        return $this->chats;
+    }
+
+    public function addChat(Chat $chat): static
+    {
+        if (!$this->chats->contains($chat)) {
+            $this->chats->add($chat);
+            $chat->setReservation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChat(Chat $chat): static
+    {
+        if ($this->chats->removeElement($chat)) {
+            // set the owning side to null (unless already changed)
+            if ($chat->getReservation() === $this) {
+                $chat->setReservation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getLanguage(): ?int
+    {
+        return $this->language;
+    }
+
+    public function setLanguage(?int $language): static
+    {
+        $this->language = $language;
 
         return $this;
     }

@@ -275,8 +275,6 @@ class DecisionController extends AbstractController
         // Notifier le client si la décision est acceptée
         if ($status === 'accepted') {
             $this->createCustommerNotification($decision->getReservation()->getCustommer(), $decision->getReservation());
-            // Vous pouvez aussi envoyer un email ici
-            // $this->sendNotificationEmail($decision->getReservation()->getCustomer(), $mailer);
         }
 
         // Retourner la réponse avec les données de la décision mise à jour

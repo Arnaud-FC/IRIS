@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\LanguagesAvailable;
 use App\Entity\Visite;
 use App\Entity\User;
 use App\Entity\Decision;
@@ -249,15 +250,19 @@ class VisiteController extends AbstractController
     #[Route('/{visiteId}/reservation', name: 'create_reservation', methods: ['POST'])]
     public function createReservation(int $visiteId, Request $request, EntityManagerInterface $em): JsonResponse
     {
+        $user = $this->getUser();
+
         // Récupérer les données de la requête
         $data = json_decode($request->getContent(), true);
-        $userId = $data['user'] ?? null;
+        //$userId = $data['user'] ?? null;
+        $languageId = $data['language'] ?? null;
+
 
         // Vérifier que l'utilisateur existe
-        $user = $em->getRepository(User::class)->find($userId);
-        if (!$user) {
-            return new JsonResponse(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
-        }
+        // $user = $em->getRepository(User::class)->find($userId);
+        // if (!$user) {
+        //     return new JsonResponse(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
+        // }
 
         // Vérifier que la visite existe
         $visite = $em->getRepository(Visite::class)->find($visiteId);
@@ -265,20 +270,37 @@ class VisiteController extends AbstractController
             return new JsonResponse(['error' => 'Visit not found'], JsonResponse::HTTP_NOT_FOUND);
         }
 
+        $language = $em->getRepository(LanguagesAvailable::class)->find($languageId);
+        if (!$language) {
+            return new JsonResponse(['error' => 'Language not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
         // Créer la réservation
         $reservation = new Reservation();
         $reservation->setVisite($visite);
         $reservation->setCustommer($user); // Associer l'utilisateur à la réservation
         $reservation->setStatus('waiting'); // Statut initial
+        $reservation->setLanguage($languageId);
         $em->persist($reservation);
         $em->flush();
 
         // Lire les guides disponibles pour la visite
         $guides = $visite->getGuide();
 
+        $eligibleGuides = [];
+        foreach ($guides as $guide) {
+            if ($guide->getLanguagesAvailables()->contains($language)) {
+                $eligibleGuides[] = $guide;
+            }
+        }
+
+        if (empty($eligibleGuides)) {
+            return new JsonResponse(['message' => 'No guide available for the selected language'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
 
         // Pour chaque guide, créer une notification
-        foreach ($guides as $guide) {
+        foreach ($eligibleGuides as $guide) {
             $this->createDecision($guide, $reservation);
             $this->createNotification($guide, $reservation);
             $this->logger->notice('+1 notif pour 1 guide');

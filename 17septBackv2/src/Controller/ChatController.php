@@ -169,7 +169,9 @@ class ChatController extends AbstractController
         int $guideId,
         UserRepository $userRepository,
         ChatRepository $chatRepository,
-        EntityManagerInterface $em
+        ReservationRepository $reservationRepository,
+        EntityManagerInterface $em,
+        Request $request
     ): JsonResponse {
         // Récupérer l'utilisateur connecté (client)
         $user = $this->getUser(); 
@@ -183,21 +185,25 @@ class ChatController extends AbstractController
             return new JsonResponse(['error' => 'Guide not found'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        // Vérifier si un chat entre le client et ce guide existe déjà
-        $existingChat = $chatRepository->findOneBy([
-            'sender' => $user,
-            'receiver' => $guide,
-        ]);
+        // // Vérifier si un chat entre le client et ce guide existe déjà
+        // $existingChat = $chatRepository->findOneBy([
+        //     'sender' => $user,
+        //     'receiver' => $guide,
+        // ]);
 
-        if ($existingChat) {
-            return new JsonResponse(['message' => 'Chat already exists', 'chatId' => $existingChat->getId()], JsonResponse::HTTP_OK);
-        }
+        // if ($existingChat) {
+        //     return new JsonResponse(['message' => 'Chat already exists', 'chatId' => $existingChat->getId()], JsonResponse::HTTP_OK);
+        // }
+
+        $data = json_decode($request->getContent(), true);
+        $reservation = $reservationRepository->find($data['reservation']);
 
         // Créer un nouveau chat entre l'utilisateur (client) et le guide
         $chat = new Chat();
         $chat->setSender($user);   // L'utilisateur connecté est le client qui initie la discussion
         $chat->setReceiver($guide); // Le guide est le destinataire
         $chat->setOpen(true);
+        $chat->setReservation($reservation);
 
         // Persister le chat dans la base de données
         $em->persist($chat);
@@ -240,6 +246,15 @@ class ChatController extends AbstractController
         if ($reservation->getCustommer()->getId() !== $user->getId()) {
             return new JsonResponse(['error' => 'You are not authorized to confirm this reservation.'], JsonResponse::HTTP_FORBIDDEN);
         }
+
+        // $reservationLanguage = $reservation->getLanguage();
+        // if (!$reservationLanguage) {
+        //     return new JsonResponse(['error' => 'Reservation language not specified'], JsonResponse::HTTP_BAD_REQUEST);
+        // }
+        // $guide = $userRepository->find($chat->getReceiver());
+        // if (!$guide->getLanguagesAvailables()->contains($reservationLanguage)) {
+        //     return new JsonResponse(['error' => 'The selected guide does not speak the required language.'], JsonResponse::HTTP_BAD_REQUEST);
+        // }
 
         // Mettre à jour le statut de la réservation à 'accepted'
         $reservation->setStatus('accepted');
